@@ -47,4 +47,5 @@
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/your-username/DriveScore.git
+   git clone https://github.com/dheeraj0301/How-Is-My-Driving-
+   
