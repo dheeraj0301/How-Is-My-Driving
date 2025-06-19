@@ -1,6 +1,6 @@
-# 🚗 DriveScore App
+# 🚗 How is My Driving? App
 
-**DriveScore** is a smart driving analytics app that evaluates your driving behavior using your device’s location and motion data. Whether you're a cautious driver or tend to brake hard or speed aggressively, this app will track and score your driving performance in real time.
+**How is My Driving?** is a smart driving analytics app that evaluates your driving behavior using your device’s location and motion data. Whether you're a cautious driver or tend to brake hard or speed aggressively, this app will track and score your driving performance in real time.
 
 ## 📱 Features
 
