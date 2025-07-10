@@ -43,8 +43,6 @@
   <img src="https://github.com/user-attachments/assets/6a64513a-8322-46a1-a2b2-eddf60801fd6" width="250" />
   <img src="https://github.com/user-attachments/assets/35516209-0b58-4f6b-a4c5-5c3cbc581a85" width="250" />
   
-  <br /> 
-  <img src="https://github.com/user-attachments/assets/4915cfc5-6149-4206-85a1-961abbbf12d2" width="250" />
 </div>
 
 
