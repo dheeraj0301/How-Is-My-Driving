@@ -2,6 +2,10 @@
 
 Youtube Demo Video Link: https://youtube.com/shorts/XKdtGA5lLoY?feature=share
 
+![How is My Driving Demo Video](https://github.com/user-attachments/assets/e34d0291-c0ab-4287-90f3-7140c3efa92c)
+![How is My Driving Demo Video(1)](https://github.com/user-attachments/assets/79622395-c260-432b-ac3d-b45ca24ca9e6)
+
+
 **How is My Driving?** is a smart driving analytics app that evaluates your driving behavior using your device’s location and motion data. Whether you're a cautious driver or tend to brake hard or speed aggressively, this app will track and score your driving performance in real time.
 
 ## 📱 Features
