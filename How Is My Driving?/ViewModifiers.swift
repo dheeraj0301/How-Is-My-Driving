@@ -1,13 +1,10 @@
 //
 //  ViewModifiers.swift
 //  How Is My Driving?
-//
-
 
 import SwiftUI
-import CoreLocation // For location permissions
-import CoreMotion // For motion permissions
-import PhotosUI // For Photo Picker
+import CoreLocation
+import CoreMotion
 
 struct PrimaryButtonModifier: ViewModifier {
     func body(content: Content) -> some View {
@@ -44,8 +41,7 @@ struct EventButtonModifier: ViewModifier {
     }
 }
 
-
-extension CLAuthorizationStatus: CustomStringConvertible {
+extension CLAuthorizationStatus: @retroactive CustomStringConvertible {
     public var description: String {
         switch self {
         case .notDetermined: return "Not Determined"
@@ -58,11 +54,8 @@ extension CLAuthorizationStatus: CustomStringConvertible {
     }
 }
 
-// CMAuthorizationStatus already has a standard description,
-// but if you wanted to customize it, you could do so similarly.
-// For now, we'll use its default.
-extension CMAuthorizationStatus { // No need for CustomStringConvertible if default is fine
-    public var customDescription: String { // Renamed to avoid conflict if you import another library
+extension CMAuthorizationStatus {
+    public var customDescription: String {
         switch self {
         case .notDetermined: return "Not Determined"
         case .restricted: return "Restricted"

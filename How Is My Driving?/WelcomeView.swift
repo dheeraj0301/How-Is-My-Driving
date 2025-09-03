@@ -4,9 +4,6 @@
 //
 
 import SwiftUI
-import CoreLocation // For location permissions
-import CoreMotion // For motion permissions
-import PhotosUI // For Photo Picker
 
 struct WelcomeView: View {
     @EnvironmentObject var scoreManager: DrivingScoreManager

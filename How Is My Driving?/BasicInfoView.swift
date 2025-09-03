@@ -8,34 +8,33 @@ struct BasicInfoView: View {
     @State private var age: String = ""
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var profileImageData: Data?
-
+    
     let avatarOptions = ["avatar1", "avatar2", "avatar3", "avatar4", "avatar5", "avatar6"]
     @State private var selectedAvatarName: String?
-
-
+    
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("Tell Us About You (Optional)")
                 .font(.title2).bold()
                 .padding(.top)
-
+            
             TextField("Name (e.g., Sarah, John's Car)", text: $name)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
-
+            
             TextField("Age (helps with relevant tips)", text: $age)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .keyboardType(.numberPad)
                 .padding(.horizontal)
-
+            
             Text("Choose Your Avatar")
                 .font(.headline)
                 .padding(.top)
-
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
                     ForEach(avatarOptions, id: \.self) { avatarName in
-                        // Ensure these images are in your Assets, otherwise use SFSymbols or placeholders
                         Image(avatarName)
                             .resizable()
                             .scaledToFill()
@@ -47,9 +46,7 @@ struct BasicInfoView: View {
                                 if let uiImage = UIImage(named: avatarName) {
                                     profileImageData = uiImage.pngData()
                                 } else {
-                                    // Fallback if image not found (e.g., use a system image)
                                     print("Avatar image '\(avatarName)' not found in Assets.")
-                                    // Example: profileImageData = UIImage(systemName: "person.fill")?.pngData()
                                 }
                             }
                     }
@@ -61,7 +58,7 @@ struct BasicInfoView: View {
                 Text("Upload Your Own")
                     .modifier(SecondaryButtonModifier())
             }
-            .onChange(of: selectedPhoto) { newItem in
+            .onChange(of: selectedPhoto, initial: false) { oldItem, newItem in
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self) {
                         profileImageData = data
@@ -70,7 +67,8 @@ struct BasicInfoView: View {
                 }
             }
             
-            if let data = profileImageData, let uiImage = UIImage(data: data) {
+            if let data = profileImageData,
+               let uiImage = UIImage(data: data) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
@@ -78,8 +76,8 @@ struct BasicInfoView: View {
                     .clipShape(Circle())
                     .padding(.top, 5)
             }
-
-
+            
+            
             Text("We respect your privacy. This information stays on your device.")
                 .font(.caption)
                 .foregroundColor(.gray)
@@ -87,7 +85,7 @@ struct BasicInfoView: View {
                 .padding(.horizontal)
             
             Spacer()
-
+            
             NavigationLink(destination: PermissionsView(hasCompletedOnboarding: $hasCompletedOnboarding).environmentObject(scoreManager)) {
                 Text("Next")
                     .modifier(PrimaryButtonModifier())

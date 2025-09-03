@@ -4,8 +4,7 @@ struct SettingsView: View {
     @EnvironmentObject var scoreManager: DrivingScoreManager
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = true
     @State private var showingResetConfirmation = false
-
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -20,7 +19,7 @@ struct SettingsView: View {
                         Spacer()
                         Text(scoreManager.userProfile.age.isEmpty ? "Not Set" : scoreManager.userProfile.age)
                     }
-                     NavigationLink("Edit Profile") {
+                    NavigationLink("Edit Profile") {
                         BasicInfoView(hasCompletedOnboarding: .constant(true))
                             .environmentObject(scoreManager)
                             .navigationTitle("Edit Profile")
@@ -40,9 +39,8 @@ struct SettingsView: View {
                         scoreManager.userProfile = UserProfile()
                         scoreManager.currentScore = 100
                         scoreManager.drivingEvents = []
-                        // Important: Trigger UI update for onboarding status
                         DispatchQueue.main.async {
-                             hasCompletedOnboarding = false
+                            hasCompletedOnboarding = false
                         }
                         print("All app data reset.")
                     }
@@ -50,8 +48,7 @@ struct SettingsView: View {
                 } message: {
                     Text("This will erase your profile, score history, and all recorded driving events. This action cannot be undone. Are you sure you want to proceed?")
                 }
-
-
+                
                 Section("About") {
                     Text("How Is My Driving? App")
                     Text("Version 1.0.1 (Concept)")

@@ -1,44 +1,39 @@
 //
 //  DataModels.swift
 //  How Is My Driving?
-//
 
 import SwiftUI
-import CoreLocation // For location permissions
-import CoreMotion // For motion permissions
-import PhotosUI // For Photo Picker
 
-// Represents a single driving event
 struct DrivingEvent: Identifiable, Codable, Hashable {
-    let id = UUID()
+    var id = UUID()
     var type: EventType
     var points: Int
     var timestamp: Date
     var description: String {
         return "\(type.rawValue): \(points > 0 ? "+" : "")\(points) pts"
     }
-    // Optional: Add magnitude for events like speeding or harsh maneuvers
+    
     var magnitude: Double? = nil
-    var duration: TimeInterval? = nil // For events like prolonged speeding
-
+    var duration: TimeInterval? = nil
+    
     enum EventType: String, Codable, CaseIterable {
         // Negative Behaviors
         case harshBraking = "Harsh Braking"
-        case rapidAcceleration = "Rapid Acceleration" // Could be "Hard Acceleration"
+        case rapidAcceleration = "Rapid Acceleration"
         case aggressiveLeftTurn = "Aggressive Left Turn"
         case aggressiveRightTurn = "Aggressive Right Turn"
-        case aggressiveSpeeding = "Aggressive Speeding" // Exceeding limit significantly
-        case prolongedSpeeding = "Prolonged Speeding" // Speeding for a duration
-        case suddenLaneChange = "Sudden Lane Change" // More complex, placeholder for now
-        case phoneUsage = "Phone Usage" // Currently Simulated
-
+        case aggressiveSpeeding = "Aggressive Speeding"
+        case prolongedSpeeding = "Prolonged Speeding"
+        case suddenLaneChange = "Sudden Lane Change"
+        case phoneUsage = "Phone Usage"
+        
         // Positive Behaviors
         case smoothDriving = "Smooth Driving Interval"
         case adherenceToSpeedLimit = "Speed Limit Adherence"
-        case gentleManeuver = "Gentle Maneuver" // Could be more specific like "Smooth Turn"
-        case maintainingSafeDistance = "Safe Following Distance" // Advanced, placeholder
-        case efficientAcceleration = "Efficient Acceleration" // Positive counterpart to rapid accel
-
+        case gentleManeuver = "Gentle Maneuver"
+        case maintainingSafeDistance = "Safe Following Distance"
+        case efficientAcceleration = "Efficient Acceleration"
+        
         // Neutral/Informational
         case tripStart = "Trip Started"
         case tripEnd = "Trip Ended"
@@ -47,9 +42,8 @@ struct DrivingEvent: Identifiable, Codable, Hashable {
     }
 }
 
-// User profile data
 struct UserProfile: Codable {
     var name: String = ""
-    var age: String = "" // Storing as String for flexibility
+    var age: String = ""
     var profileImageData: Data?
 }

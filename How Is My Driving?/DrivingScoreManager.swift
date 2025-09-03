@@ -6,21 +6,20 @@
 import SwiftUI
 import CoreLocation
 import CoreMotion
-import Combine // For using timers and publishers if needed for debouncing etc.
+import Combine
 
-// Enum to represent the state of a driving trip
 enum TripState: String, Codable {
-    case idle // App is open, no trip active (or after app launch before anything)
-    case active // Trip is currently being recorded
-    case paused // Trip was active, but is now paused
-    case stopped // Trip has been explicitly stopped by the user (ready for summary or new trip)
+    case idle
+    case active
+    case paused
+    case stopped
 }
 
 class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // MARK: - Published Properties for UI
     @Published var currentScore: Int = 100
-    @Published var currentSpeedMPH: Double = 0 // Speed in MPH for display
-    @Published var postedSpeedLimitMPH: Double = 30 // Speed limit in MPH
+    @Published var currentSpeedMPH: Double = 0
+    @Published var postedSpeedLimitMPH: Double = 30
     @Published var drivingEvents: [DrivingEvent] = []
     @Published var userProfile: UserProfile = UserProfile()
     @Published var tripState: TripState = .idle
@@ -28,20 +27,18 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
 
     // Permissions
     @Published var locationPermissionStatus: CLAuthorizationStatus = .notDetermined
-    @Published var motionPermissionStatus: CMAuthorizationStatus = .notDetermined // General Motion & Fitness Activity status
-    @Published var isMotionActivityAvailable: Bool = true // For general Motion & Fitness
+    @Published var motionPermissionStatus: CMAuthorizationStatus = .notDetermined
+    @Published var isMotionActivityAvailable: Bool = false
 
     // MARK: - Internal Properties
     private var locationManager: CLLocationManager?
-    private let motionManager = CMMotionManager() // For accelerometer and gyroscope data
-    private let motionActivityManager = CMMotionActivityManager() // Re-added for permission requests
+    private let motionManager = CMMotionManager()
+    private let motionActivityManager = CMMotionActivityManager()
     private var smoothDrivingTimer: Timer?
     private var prolongedSpeedingTimer: Timer?
     private var lastLocation: CLLocation?
     private var lastSpeedCheckTime: Date?
 
-
-    // Thresholds for event detection (these would need tuning)
     private let harshAccelerationThreshold: Double = 2.5 // m/s^2 (forward Gs, positive Y on device if upright)
     private let harshBrakingThreshold: Double = -3.0    // m/s^2 (backward Gs, negative Y on device if upright)
     private let aggressiveTurnThreshold: Double = 0.4  // Lateral G's (approx. using Z-axis rotation rate for simplicity)
@@ -56,7 +53,7 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         loadUserProfile()
         loadScoreAndEvents()
         setupLocationManager()
-        checkMotionAvailability() // Checks general motion activity and specific sensor availability
+        checkMotionAvailability()
         loadTripState()
         updateTripStatusMessage()
     }
@@ -79,7 +76,7 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         saveTripState()
         
         startLocationUpdates()
-        startMotionUpdates() // For accelerometer and gyro
+        startMotionUpdates()
         startSmoothDrivingTimer()
         print("Trip Started. Score reset. Location and Motion updates started.")
     }
@@ -146,10 +143,9 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         currentSpeedMPH = 0
         lastLocation = nil
         saveScoreAndEvents()
-        // If a trip was active/paused, it's good to also set it to stopped or idle.
         if tripState == .active || tripState == .paused {
-            tripState = .stopped // Or .idle, depending on desired flow
-            addEvent(type: .tripEnd, points: 0) // Log that the "reset" effectively ended the previous session
+            tripState = .stopped
+            addEvent(type: .tripEnd, points: 0)
             updateTripStatusMessage(score: currentScore)
             saveTripState()
         }
@@ -165,7 +161,7 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         case .paused:
             tripStatusMessage = "Trip paused. Press 'Resume' or 'Stop'."
         case .stopped:
-            let scoreToDisplay = score ?? currentScore // Use provided score or current if nil
+            let scoreToDisplay = score ?? currentScore
             tripStatusMessage = "Trip ended. Final Score: \(scoreToDisplay). Ready for new trip."
         }
     }
@@ -174,8 +170,6 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
     func addEvent(type: DrivingEvent.EventType, points: Int, magnitude: Double? = nil, duration: TimeInterval? = nil) {
         let informationalEvents: [DrivingEvent.EventType] = [.tripStart, .tripEnd, .tripPause, .tripResume]
         
-        // Allow informational events regardless of trip state for logging purposes.
-        // For other events, only log if the trip is active.
         if !informationalEvents.contains(type) && tripState != .active {
             print("Event \(type.rawValue) ignored: Trip not active.")
             return
@@ -246,10 +240,7 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
             if tripState == .active || tripState == .paused {
                 print("App restarted during an active/paused trip. Setting trip state to stopped.")
                 tripState = .stopped
-                // Optionally add an event to signify this auto-stop
-                // addEvent(type: .tripEnd, points: 0, magnitude: nil, duration: nil) // This might add duplicate tripEnd if already saved
-                saveTripState() // Save the new 'stopped' state
-                 // Score and events from the interrupted trip should already be loaded by loadScoreAndEvents()
+                saveTripState()
             }
         } else {
             tripState = .idle
@@ -265,14 +256,13 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         locationManager?.allowsBackgroundLocationUpdates = true
         locationManager?.pausesLocationUpdatesAutomatically = false
         locationManager?.showsBackgroundLocationIndicator = true
-        locationPermissionStatus = CLLocationManager.authorizationStatus()
+        locationPermissionStatus = CLLocationManager().authorizationStatus
     }
 
     func startLocationUpdates() {
         guard tripState == .active else { return }
         guard CLLocationManager.locationServicesEnabled() else {
             print("Location services are disabled.")
-            // TODO: Update UI to inform user (e.g., via a published property or alert)
             return
         }
 
@@ -283,7 +273,6 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
             locationManager?.requestWhenInUseAuthorization()
         } else {
             print("Location permission not granted: \(locationPermissionStatus.description)")
-            // TODO: Update UI, guide to settings
         }
     }
 
@@ -293,7 +282,6 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         
         guard motionManager.isAccelerometerAvailable else {
             print("Accelerometer not available.")
-            // Consider updating a more specific flag if needed for UI
             return
         }
         guard motionManager.isGyroAvailable else {
@@ -301,8 +289,8 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
             return
         }
 
-        motionManager.accelerometerUpdateInterval = 0.1 // 10 Hz
-        motionManager.gyroUpdateInterval = 0.1       // 10 Hz
+        motionManager.accelerometerUpdateInterval = 0.1
+        motionManager.gyroUpdateInterval = 0.1       
 
         motionManager.startAccelerometerUpdates(to: .main) { [weak self] (accelerometerData, error) in
             guard let self = self, self.tripState == .active, let data = accelerometerData else { return }
@@ -325,8 +313,6 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
     }
     
     private func processAccelerometerData(_ acceleration: CMAcceleration) {
-        // Simplified: Y-axis for acceleration/braking assuming portrait phone orientation.
-        // A robust solution needs device attitude to get car's frame of reference.
         let longitudinalAcceleration = acceleration.y
         
         if longitudinalAcceleration > harshAccelerationThreshold {
@@ -339,13 +325,12 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
     }
 
     private func processGyroData(_ rotationRate: CMRotationRate) {
-        // Simplified: Z-axis for turns (yaw rate). Robust solution needs attitude.
         let yawRate = rotationRate.z
         
         if abs(yawRate) > aggressiveTurnThreshold {
-            if yawRate > 0 { // Convention: Positive for left turn (can vary)
+            if yawRate > 0 {
                 addEvent(type: .aggressiveLeftTurn, points: -3, magnitude: yawRate)
-            } else { // Negative for right turn
+            } else {
                 addEvent(type: .aggressiveRightTurn, points: -3, magnitude: yawRate)
             }
         }
@@ -446,21 +431,15 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
 
     // MARK: - Permissions
     private func checkMotionAvailability() {
-        // Check for general Motion & Fitness Activity availability
         self.isMotionActivityAvailable = CMMotionActivityManager.isActivityAvailable()
-        
-        // Also check if specific sensors (accelerometer, gyro) are available via CMMotionManager
         let sensorsAvailable = motionManager.isAccelerometerAvailable && motionManager.isGyroAvailable
         
         if !self.isMotionActivityAvailable || !sensorsAvailable {
             print("Motion activity or specific sensors (Accel/Gyro) not available on this device.")
-            // If general motion activity is not available, set status to restricted.
-            // Individual sensor checks (isAccelerometerAvailable) don't have separate auth statuses.
             if !self.isMotionActivityAvailable {
                  self.motionPermissionStatus = .restricted
             }
         } else {
-            // Get the authorization status for CMMotionActivityManager (Motion & Fitness)
             self.motionPermissionStatus = CMMotionActivityManager.authorizationStatus()
         }
          print("Motion Availability Check: General Activity Available: \(self.isMotionActivityAvailable), Sensors (Accel/Gyro) Available: \(sensorsAvailable), Motion Permission Status: \(self.motionPermissionStatus.customDescription)")
@@ -471,53 +450,49 @@ class DrivingScoreManager: NSObject, ObservableObject, CLLocationManagerDelegate
         if locationPermissionStatus == .notDetermined {
             locationManager?.requestWhenInUseAuthorization()
         } else if locationPermissionStatus == .denied || locationPermissionStatus == .restricted {
-            // Optionally, guide user to settings
             print("Location permission was denied or restricted. Guide user to settings.")
         }
     }
     
-    // This method requests permission for CMMotionActivityManager (Motion & Fitness)
-    // which is a higher-level API than direct CMMotionManager sensor access.
-    // Direct sensor access (accelerometer, gyro) usually doesn't require a separate explicit prompt
-    // beyond the app's general capabilities, but their data might be restricted if Motion & Fitness is denied.
+    func allPermissionsGrantedOrMotionUnavailable() -> Bool {
+        let locationOK = self.locationPermissionStatus == .authorizedWhenInUse || self.locationPermissionStatus == .authorizedAlways
+        let motionOK = (self.isMotionActivityAvailable || self.motionPermissionStatus == .authorized)
+        return locationOK && motionOK
+    }
+    
     func requestMotionPermission() {
         guard isMotionActivityAvailable else {
             print("Motion activity not available, cannot request permission.")
-            // UI should reflect that this feature is unavailable.
             return
         }
 
         if motionPermissionStatus == .notDetermined {
-            // Querying CMMotionActivityManager can trigger the system prompt for Motion & Fitness.
             self.motionActivityManager.queryActivityStarting(from: Date(timeIntervalSinceNow: -3600), to: Date(), to: .main) { [weak self] (activities, error) in
                 DispatchQueue.main.async {
                     guard let self = self else { return }
                     if let error = error as NSError? {
                         print("Motion Activity Query Error for permission request: \(error.localizedDescription)")
-                        // Update status based on error or re-check
                         self.motionPermissionStatus = CMMotionActivityManager.authorizationStatus()
                     } else {
-                        // If no error and activities are returned (even if nil/empty), permission was likely granted or already determined.
-                        self.motionPermissionStatus = CMMotionActivityManager.authorizationStatus() // Re-check to be sure
-                        if self.motionPermissionStatus == .notDetermined { // If still not determined after query (unlikely but possible)
+                        self.motionPermissionStatus = CMMotionActivityManager.authorizationStatus()
+                        if self.motionPermissionStatus == .notDetermined {
                             print("Motion permission still not determined after query.")
                         } else if self.motionPermissionStatus == .authorized {
                              print("Motion & Fitness permission granted.")
                         }
                     }
-                    self.objectWillChange.send() // Ensure UI updates if status changes
+                    self.objectWillChange.send()
                 }
             }
         } else if motionPermissionStatus == .denied || motionPermissionStatus == .restricted {
             print("Motion & Fitness permission was denied or restricted. Guide user to settings.")
-            // Optionally, guide user to settings
         }
     }
 
-    func updatePermissionStatus() { // Call on app foreground or view appear
-        locationPermissionStatus = CLLocationManager.authorizationStatus()
-        checkMotionAvailability() // Re-check sensor availability and general motion permission
-        self.objectWillChange.send() // Manually notify observers if statuses changed
+    func updatePermissionStatus() {
+        locationPermissionStatus = CLLocationManager().authorizationStatus
+        checkMotionAvailability()
+        self.objectWillChange.send()
     }
 }
 

@@ -3,9 +3,7 @@
 //  How Is My Driving?
 //
 
-
 import SwiftUI
-import SwiftData
 
 @main
 struct HowIsMyDrivingApp: App {

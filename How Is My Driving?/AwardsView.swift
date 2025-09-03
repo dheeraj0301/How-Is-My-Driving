@@ -1,13 +1,8 @@
 //
-//  PlaceholderView.swift
+//  AwardsView.swift
 //  How Is My Driving?
-//
-
 
 import SwiftUI
-import CoreLocation // For location permissions
-import CoreMotion // For motion permissions
-import PhotosUI // For Photo Picker
 
 struct AwardsView: View {
     var body: some View {
